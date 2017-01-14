@@ -1,0 +1,9 @@
+*.pyc
+*.mp3
+*.mp4
+*.flv
+old/
+*.part
+*.txt
+/.idea
+/.idea/*

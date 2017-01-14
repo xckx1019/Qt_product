@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Detector</class>
+ <widget class="QDialog" name="Detector">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>433</width>
+    <height>323</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Detector</string>
+  </property>
+  <widget class="QPushButton" name="detector1Button">
+   <property name="geometry">
+    <rect>
+     <x>50</x>
+     <y>30</y>
+     <width>101</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Detector 1</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="detector1Button_2">
+   <property name="geometry">
+    <rect>
+     <x>50</x>
+     <y>180</y>
+     <width>101</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Detector 2</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="lineEdit">
+   <property name="geometry">
+    <rect>
+     <x>210</x>
+     <y>29</y>
+     <width>211</width>
+     <height>51</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="lineEdit_2">
+   <property name="geometry">
+    <rect>
+     <x>210</x>
+     <y>180</y>
+     <width>211</width>
+     <height>51</height>
+    </rect>
+   </property>
+  </widget>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>detector1Button</sender>
+   <signal>clicked()</signal>
+   <receiver>lineEdit</receiver>
+   <slot>clear()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>100</x>
+     <y>55</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>315</x>
+     <y>54</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>detector1Button_2</sender>
+   <signal>clicked()</signal>
+   <receiver>lineEdit_2</receiver>
+   <slot>clear()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>149</x>
+     <y>205</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>219</x>
+     <y>205</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>
