@@ -3,8 +3,9 @@ from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from PIL import Image
 import numpy as np
+from scipy.misc import imresize
 from matplotlib import pyplot as plt
-import urllib2
+from PIL.ImageQt import ImageQt
 import re
 
 class detector1(QWidget):
@@ -35,8 +36,8 @@ class detector1(QWidget):
       self.btn1.clicked.connect(self.detector2_2)
       self.btn1.clicked.connect(self.detector1)
       self.btn1.clicked.connect(self.detector21)#call def detector
-      self.btn1.clicked.connect(self.detector3_h)
-      self.btn1.clicked.connect(self.detector3_v)
+      self.btn1.clicked.connect(self.detector3_combined)
+      #self.btn1.clicked.connect(self.detector3_v)
       layout.addWidget(self.btn1)
 
       #VBOX2
@@ -67,13 +68,15 @@ class detector1(QWidget):
       self.la3 = QLabel("JPEG STH")
       layout2.addWidget(self.la3, 5, 0)
 
-      self.contents5 = QTextEdit()
-      self.contents5.resize(self.contents5.sizeHint())
-      layout2.addWidget(self.contents5, 6, 0)
+      #self.contents5 = QTextEdit()
+      #self.contents5.resize(self.contents5.sizeHint())
+      #layout2.addWidget(self.contents5, 6, 0)
 
-      self.contents6 = QTextEdit()
-      self.contents6.resize(self.contents6.sizeHint())
-      layout2.addWidget(self.contents6, 6, 1)
+      #self.contents6 = QTextEdit()
+     # self.contents6.resize(self.contents6.sizeHint())
+     # layout2.addWidget(self.contents6, 6, 1)
+      self.cb = QLabel("Detector 3")  #Display the image
+      layout2.addWidget(self.cb)
 
       #HBOX
       layout4 = QHBoxLayout()
@@ -343,7 +346,7 @@ class detector1(QWidget):
        return [k, [n, m], [p_max, q_max]]
 
 
-   def detector3_h(self):
+   def detector3_combined(self):
        im = Image.open(str(self.fname)).convert('L')
        pix = np.array(im).astype(np.float)
        r, c = pix.shape
@@ -354,7 +357,9 @@ class detector1(QWidget):
            r, c = pix.shape
 
        arr_h = np.zeros((31, 32))
+       arr_v = np.zeros((32, 31))
        sum_h = np.zeros((c / 32, r / 32))
+       sum_v = np.zeros((c / 32, r / 32))
 
        if r % 32 == 0 and c & 32 == 0:
            r_index = r / 32
@@ -383,14 +388,41 @@ class detector1(QWidget):
                        sum1 = (fft[4, 0] + fft[8, 0] + fft[12, 0]) / sum(fft[1:16, 0])
 
                    sum_h[col][row] = sum1
+           myarray = np.asarray(sum_h)
+
+           # vertical
+           for col in xrange(0, c_index):
+               for row in xrange(0, r_index):
+                   for i in xrange(32):
+                       for j in xrange(31):
+                           v1 = pix[row * 32 + i, col * 32 + j + 1]
+                           v2 = pix[row * 32 + i, col * 32 + j]
+                           v = v1 - v2
+                           arr_v[i][j] = v
+
+                   arr_v = np.abs(arr_v)
+                   fft2 = np.abs(np.fft.fft2(arr_v, [32, 32]))  # FFT of vertical gradient
+                   if sum(fft2[0, 1:16]) == 0:
+                       sum2 = 0
+                   else:
+                       sum2 = (fft2[0, 4] + fft2[0, 8] + fft2[0, 12]) / sum(fft2[0, 1:16])
+
+                   sum_v[col][row] = sum2
+           myarray2 = np.asarray(sum_v)
            # print sum_h
            # plt.imshow(sum_h)
            # plt.show()
-           myarray2 = np.asarray(sum_h)
-           self.contents5.setText(str(myarray2))
-           return myarray2
+           combined = (myarray + myarray2)/2.0
+           g = np.asarray(dtype=np.dtype('float'), a=combined)
+           g = imresize(g, pix.shape, interp='nearest')
+           new_image = Image.fromarray(g)
+           qimage = ImageQt(new_image)
 
+           self.cb.setPixmap(QPixmap.fromImage(qimage))
+           self.cb.show()
+           return g
 
+'''
    def detector3_v(self):
        im = Image.open(str(self.fname)).convert('L')
        pix = np.array(im).astype(np.float)
@@ -433,7 +465,7 @@ class detector1(QWidget):
        self.contents6.setText(str(myarray2))
        return myarray2
 
-
+'''
 def main():
    app = QApplication(sys.argv)
    ex = detector1()
