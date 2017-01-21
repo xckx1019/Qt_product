@@ -11,6 +11,7 @@ import re
 class detector1(QWidget):
    def __init__(self, parent = None):
       super(detector1, self).__init__(parent)
+      #self.showMaximized()
       self.setWindowTitle("Image Detector")
       self.setWindowIcon(QIcon('snorlax.png'))
 
@@ -22,6 +23,7 @@ class detector1(QWidget):
       layout.addWidget(self.btn)
 
       self.le = QLabel("Hello!")  #Display the image
+      self.le.resize(600, 600)
       layout.addWidget(self.le)
 
       self.btnExtract = QPushButton("Extract the information of chosen image") #Extract the info of image
@@ -47,15 +49,18 @@ class detector1(QWidget):
       layout2.addWidget(self.la1, 0, 0)
 
       self.contents = QTextEdit()
-      self.contents.resize(self.contents.sizeHint())
+      self.contents.resize(200, 200)
       layout2.addWidget(self.contents, 1, 0)
 
       self.contents2 = QTextEdit()
-      self.contents2.resize(self.contents2.sizeHint())
+      self.contents2.resize(200, 200)
       layout2.addWidget(self.contents2, 1, 1)
 
       self.la2 = QLabel("JPEG STH")
       layout2.addWidget(self.la2, 3, 0)
+
+      self.colorMapDeclare = QLabel("Low Compression                                                                                      High Compression")
+      layout2.addWidget(self.colorMapDeclare, 3, 2)
 
       self.contents3 = QTextEdit()
       self.contents3.resize(self.contents3.sizeHint())
@@ -65,8 +70,15 @@ class detector1(QWidget):
       self.contents4.resize(self.contents4.sizeHint())
       layout2.addWidget(self.contents4, 4, 1)
 
+      self.content4_3 = QLabel("Color Map")  #Display the image
+      self.content4_3.setPixmap(QPixmap("Capture.png"))
+      layout2.addWidget(self.content4_3, 4, 2)
+
+      layout3 = QVBoxLayout()
+
       self.la3 = QLabel("JPEG STH")
-      layout2.addWidget(self.la3, 5, 0)
+      self.la3.setAlignment(Qt.AlignCenter)
+      layout3.addWidget(self.la3)
 
       #self.contents5 = QTextEdit()
       #self.contents5.resize(self.contents5.sizeHint())
@@ -76,13 +88,17 @@ class detector1(QWidget):
      # self.contents6.resize(self.contents6.sizeHint())
      # layout2.addWidget(self.contents6, 6, 1)
       self.cb = QLabel("Detector 3")  #Display the image
-      layout2.addWidget(self.cb)
+      self.cb.setAlignment(Qt.AlignCenter)
+      layout3.addWidget(self.cb)
 
       #HBOX
       layout4 = QHBoxLayout()
       layout4.addLayout(layout)
-      layout4.addLayout(layout2)
-
+      layout5 = QVBoxLayout()
+      layout5.addLayout(layout2)
+      layout5.addLayout(layout3)
+      layout4.addLayout(layout5)
+      #layout4.addLayout(layout2)
 
       self.setLayout(layout4)
 
@@ -138,42 +154,42 @@ class detector1(QWidget):
 
        h3 = abs(h1 - h2)
        k = sum(h3)
-       self.contents3.setText("The K value is: " + str(k))
+       self.contents3.setText(str(k))
        #self.contents3.setStyleSheet("QTextEdit {color:red}")
        #self.contents3.setStyleSheet("QTextEdit { background-color: rgb(0, 255, 0); }");
        norm = k / 1.6
        if 0 <= norm < 0.1:
-           self.contents3.setStyleSheet("QTextEdit { background-color: rgb(224, 255, 255); }")
+           self.contents3.setStyleSheet("QTextEdit { background-color: rgb(255,165,0); }")
        elif 0.1 <= norm < 0.2:
-           self.contents3.setStyleSheet("QTextEdit { background-color: rgb(175, 238, 238); }")
+           self.contents3.setStyleSheet("QTextEdit { background-color: rgb(255,140,0); }")
        elif 0.2 <= norm < 0.3:
-           self.contents3.setStyleSheet("QTextEdit { background-color: rgb(124, 252, 0); }")
+           self.contents3.setStyleSheet("QTextEdit { background-color: rgb(255,69,0); }")
        elif 0.3 <= norm < 0.4:
-           self.contents3.setStyleSheet("QTextEdit { background-color: rgb(127, 255, 0); }")
+           self.contents3.setStyleSheet("QTextEdit { background-color: rgb(255,160,122); }")
        elif 0.4 <= norm < 0.5:
-           self.contents3.setStyleSheet("QTextEdit { background-color: rgb(0, 250, 154); }")
+           self.contents3.setStyleSheet("QTextEdit { background-color: rgb(250,128,114); }")
        elif 0.5 <= norm < 0.6:
-           self.contents3.setStyleSheet("QTextEdit { background-color: rgb(50, 205, 50); }")
+           self.contents3.setStyleSheet("QTextEdit { background-color: rgb(233,150,122); }")
        elif 0.6 <= norm < 0.7:
-           self.contents3.setStyleSheet("QTextEdit { background-color: rgb(233, 150, 122); }")
+           self.contents3.setStyleSheet("QTextEdit { background-color: rgb(240,128,128); }")
        elif 0.7 <= norm < 0.8:
-           self.contents3.setStyleSheet("QTextEdit { background-color: rgb(250, 128, 114); }")
+           self.contents3.setStyleSheet("QTextEdit { background-color: rgb(205,92,92); }")
        elif 0.8 <= norm < 0.9:
-           self.contents3.setStyleSheet("QTextEdit { background-color: rgb(255, 160, 122); }")
+           self.contents3.setStyleSheet("QTextEdit { background-color: rgb(255,127,80); }")
        elif 0.9 <= norm < 1.0:
-           self.contents3.setStyleSheet("QTextEdit { background-color: rgb(255, 165, 0); }")
+           self.contents3.setStyleSheet("QTextEdit { background-color: rgb(255,99,71); }")
        elif 1.0 <= norm < 1.1:
-           self.contents3.setStyleSheet("QTextEdit { background-color: rgb(255, 140, 0); }")
+           self.contents3.setStyleSheet("QTextEdit { background-color: rgb(255,0,0); }")
        elif 1.1 <= norm < 1.2:
-           self.contents3.setStyleSheet("QTextEdit { background-color: rgb(255, 127,80); }")
+           self.contents3.setStyleSheet("QTextEdit { background-color: rgb(220,20,60); }")
        elif 1.2 <= norm < 1.3:
-           self.contents3.setStyleSheet("QTextEdit { background-color: rgb(240, 128, 128); }")
+           self.contents3.setStyleSheet("QTextEdit { background-color: rgb(178,34,34); }")
        elif 1.3 <= norm < 1.4:
-           self.contents3.setStyleSheet("QTextEdit { background-color: rgb(255, 99, 71); }")
+           self.contents3.setStyleSheet("QTextEdit { background-color: rgb(165,42,42); }")
        elif 1.4 <= norm < 1.5:
-           self.contents3.setStyleSheet("QTextEdit { background-color: rgb(255, 69, 0); }")
+           self.contents3.setStyleSheet("QTextEdit { background-color: rgb(139,0,0); }")
        else:
-           self.contents3.setStyleSheet("QTextEdit { background-color: rgb(255, 0, 0); }")
+           self.contents3.setStyleSheet("QTextEdit { background-color: rgb(128,0,0); }")
 
        return k
 
@@ -204,7 +220,7 @@ class detector1(QWidget):
                    E_max = E[p, q]
                    q_max = q
                    p_max = p
-       self.contents.setText("The Q_max and P_max value are: " + str([q_max, p_max]))
+       self.contents.setText(str([q_max, p_max]))
 
        if [7 - q_max, 7 - p_max] == [int(self.findNum[3]), int(self.findNum[4])]:
         self.contents.setStyleSheet("QTextEdit { background-color: rgb(0, 255, 0); }")
@@ -237,7 +253,7 @@ class detector1(QWidget):
                b = E.sum(axis=1)
                c = np.argmax(a)
                d = np.argmax(b)
-       self.contents2.setText("The Q_max and P_max value are: " + str([c, d]))
+       self.contents2.setText(str([c, d]))
 
        if [7 - c, 7 - d] == [int(self.findNum[3]), int(self.findNum[4])]:
         self.contents2.setStyleSheet("QTextEdit { background-color: rgb(0, 255, 0); }")
@@ -308,40 +324,40 @@ class detector1(QWidget):
 
        h3 = abs(h1 - h2)
        k = sum(h3)
-       self.contents4.setText("The K value, N and M value and Q_max and P_max value are: " + str([k, [n, m], [c, d]]))
+       self.contents4.setText(str([k]))
        norm = k / 1.6
        if 0 <= norm < 0.1:
-           self.contents4.setStyleSheet("QTextEdit { background-color: rgb(224, 255, 255); }")
+           self.contents4.setStyleSheet("QTextEdit { background-color: rgb(255,165,0); }")
        elif 0.1 <= norm < 0.2:
-           self.contents4.setStyleSheet("QTextEdit { background-color: rgb(175, 238, 238); }")
+           self.contents4.setStyleSheet("QTextEdit { background-color: rgb(255,140,0); }")
        elif 0.2 <= norm < 0.3:
-           self.contents4.setStyleSheet("QTextEdit { background-color: rgb(124, 252, 0); }")
+           self.contents4.setStyleSheet("QTextEdit { background-color: rgb(255,69,0); }")
        elif 0.3 <= norm < 0.4:
-           self.contents4.setStyleSheet("QTextEdit { background-color: rgb(127, 255, 0); }")
+           self.contents4.setStyleSheet("QTextEdit { background-color: rgb(255,160,122); }")
        elif 0.4 <= norm < 0.5:
-           self.contents4.setStyleSheet("QTextEdit { background-color: rgb(0, 250, 154); }")
+           self.contents4.setStyleSheet("QTextEdit { background-color: rgb(250,128,114); }")
        elif 0.5 <= norm < 0.6:
-           self.contents4.setStyleSheet("QTextEdit { background-color: rgb(50, 205, 50); }")
+           self.contents4.setStyleSheet("QTextEdit { background-color: rgb(233,150,122); }")
        elif 0.6 <= norm < 0.7:
-           self.contents4.setStyleSheet("QTextEdit { background-color: rgb(233, 150, 122); }")
+           self.contents4.setStyleSheet("QTextEdit { background-color: rgb(240,128,128); }")
        elif 0.7 <= norm < 0.8:
-           self.contents4.setStyleSheet("QTextEdit { background-color: rgb(250, 128, 114); }")
+           self.contents4.setStyleSheet("QTextEdit { background-color: rgb(205,92,92); }")
        elif 0.8 <= norm < 0.9:
-           self.contents4.setStyleSheet("QTextEdit { background-color: rgb(255, 160, 122); }")
+           self.contents4.setStyleSheet("QTextEdit { background-color: rgb(255,127,80); }")
        elif 0.9 <= norm < 1.0:
-           self.contents4.setStyleSheet("QTextEdit { background-color: rgb(255, 165, 0); }")
+           self.contents4.setStyleSheet("QTextEdit { background-color: rgb(255,99,71); }")
        elif 1.0 <= norm < 1.1:
-           self.contents4.setStyleSheet("QTextEdit { background-color: rgb(255, 140, 0); }")
+           self.contents4.setStyleSheet("QTextEdit { background-color: rgb(255,0,0); }")
        elif 1.1 <= norm < 1.2:
-           self.contents4.setStyleSheet("QTextEdit { background-color: rgb(255, 127,80); }")
+           self.contents4.setStyleSheet("QTextEdit { background-color: rgb(220,20,60); }")
        elif 1.2 <= norm < 1.3:
-           self.contents4.setStyleSheet("QTextEdit { background-color: rgb(240, 128, 128); }")
+           self.contents4.setStyleSheet("QTextEdit { background-color: rgb(178,34,34); }")
        elif 1.3 <= norm < 1.4:
-           self.contents4.setStyleSheet("QTextEdit { background-color: rgb(255, 99, 71); }")
+           self.contents4.setStyleSheet("QTextEdit { background-color: rgb(165,42,42); }")
        elif 1.4 <= norm < 1.5:
-           self.contents4.setStyleSheet("QTextEdit { background-color: rgb(255, 69, 0); }")
+           self.contents4.setStyleSheet("QTextEdit { background-color: rgb(139,0,0); }")
        else:
-           self.contents4.setStyleSheet("QTextEdit { background-color: rgb(255, 0, 0); }")
+           self.contents4.setStyleSheet("QTextEdit { background-color: rgb(128,0,0); }")
 
        return [k, [n, m], [p_max, q_max]]
 
