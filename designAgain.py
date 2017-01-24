@@ -5,80 +5,101 @@ from PIL import Image
 import numpy as np
 from scipy.misc import imresize
 from matplotlib import pyplot as plt
+from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
 from PIL.ImageQt import ImageQt
 import re
+import cv2
+import random
+
+img = cv2.imread('zsnorlax.png')
 
 class detector1(QWidget):
    def __init__(self, parent = None):
       super(detector1, self).__init__(parent)
-      #self.showMaximized()
+
+      self.showMaximized()
       self.setWindowTitle("Image Detector")
       self.setWindowIcon(QIcon('snorlax.png'))
 
       #VBOX1
-      layout = QVBoxLayout()
+      layout_left_displayInfo = QVBoxLayout()
+      layout_left_chooseImage = QHBoxLayout()
+
+      self.chooseLabel = QLabel("Please choose an image to be detected:")
+      self.chooseLabel.setAlignment(Qt.AlignCenter)
+      layout_left_chooseImage.addWidget(self.chooseLabel)
 
       self.btn = QPushButton("Choose the image")  #Choose the image button
+      self.btn.setLayoutDirection(Qt.RightToLeft)
       self.btn.clicked.connect(self.getfile)
-      layout.addWidget(self.btn)
+      layout_left_chooseImage.addWidget(self.btn)
 
       self.le = QLabel("Hello!")  #Display the image
-      self.le.resize(600, 600)
-      layout.addWidget(self.le)
+      self.le.setAlignment(Qt.AlignCenter)
+      layout_left_displayInfo.addWidget(self.le)
 
       self.btnExtract = QPushButton("Extract the information of chosen image") #Extract the info of image
       self.btnExtract.clicked.connect(self.getnum) #call def getinfo
-      layout.addWidget(self.btnExtract)
+      layout_left_displayInfo.addWidget(self.btnExtract)
 
       self.extractNum = QTextEdit()  # Display the number of chosen image
-      layout.addWidget(self.extractNum)
+      layout_left_displayInfo.addWidget(self.extractNum)
 
       self.btn1 = QPushButton("Process") # All process
       self.btn1.clicked.connect(self.detector2_1)
       self.btn1.clicked.connect(self.detector2_2)
+      self.btn1.clicked.connect(self.detector_grid)
       self.btn1.clicked.connect(self.detector1)
       self.btn1.clicked.connect(self.detector21)#call def detector
       self.btn1.clicked.connect(self.detector3_combined)
       #self.btn1.clicked.connect(self.detector3_v)
-      layout.addWidget(self.btn1)
+      layout_left_displayInfo.addWidget(self.btn1)
 
       #VBOX2
-      layout2 = QGridLayout()
+      layout_right_grid = QGridLayout()
 
       self.la1 = QLabel("JPEG Grid Detector")
-      layout2.addWidget(self.la1, 0, 0)
+      layout_right_grid.addWidget(self.la1, 0, 0)
 
       self.contents = QTextEdit()
-      self.contents.resize(200, 200)
-      layout2.addWidget(self.contents, 1, 0)
+      self.contents.setMinimumSize(200, 200)
+      layout_right_grid.addWidget(self.contents, 1, 0)
 
       self.contents2 = QTextEdit()
-      self.contents2.resize(200, 200)
-      layout2.addWidget(self.contents2, 1, 1)
+      self.contents2.setMinimumSize(200, 200)
+      layout_right_grid.addWidget(self.contents2, 1, 1)
+
+        #canvas
+      self.figure = plt.figure()
+      self.canvas = FigureCanvas(self.figure)
+      layout_right_grid.addWidget(self.canvas, 1, 2)
 
       self.la2 = QLabel("JPEG STH")
-      layout2.addWidget(self.la2, 3, 0)
+      layout_right_grid.addWidget(self.la2, 3, 0)
 
       self.colorMapDeclare = QLabel("Low Compression                                                                                      High Compression")
-      layout2.addWidget(self.colorMapDeclare, 3, 2)
+      layout_right_grid.addWidget(self.colorMapDeclare, 3, 2)
 
       self.contents3 = QTextEdit()
-      self.contents3.resize(self.contents3.sizeHint())
-      layout2.addWidget(self.contents3, 4, 0)
+      #self.contents3.resize(self.contents3.sizeHint())
+      self.contents3.setMinimumSize(200, 50)
+      layout_right_grid.addWidget(self.contents3, 4, 0)
 
       self.contents4 = QTextEdit()
-      self.contents4.resize(self.contents4.sizeHint())
-      layout2.addWidget(self.contents4, 4, 1)
+      #self.contents4.resize(self.contents4.sizeHint())
+      self.contents.setMinimumSize(200, 50)
+      layout_right_grid.addWidget(self.contents4, 4, 1)
 
       self.content4_3 = QLabel("Color Map")  #Display the image
       self.content4_3.setPixmap(QPixmap("Capture.png"))
-      layout2.addWidget(self.content4_3, 4, 2)
+      layout_right_grid.addWidget(self.content4_3, 4, 2)
 
-      layout3 = QVBoxLayout()
+      layout_right_displayImage = QVBoxLayout()
 
       self.la3 = QLabel("JPEG STH")
       self.la3.setAlignment(Qt.AlignCenter)
-      layout3.addWidget(self.la3)
+      layout_right_displayImage.addWidget(self.la3)
 
       #self.contents5 = QTextEdit()
       #self.contents5.resize(self.contents5.sizeHint())
@@ -89,18 +110,26 @@ class detector1(QWidget):
      # layout2.addWidget(self.contents6, 6, 1)
       self.cb = QLabel("Detector 3")  #Display the image
       self.cb.setAlignment(Qt.AlignCenter)
-      layout3.addWidget(self.cb)
+      layout_right_displayImage.addWidget(self.cb)
 
       #HBOX
-      layout4 = QHBoxLayout()
-      layout4.addLayout(layout)
-      layout5 = QVBoxLayout()
-      layout5.addLayout(layout2)
-      layout5.addLayout(layout3)
-      layout4.addLayout(layout5)
+      layout_overall = QHBoxLayout() #overall Horizontal
+      #layout_overall.addLayout(layout_left_displayInfo)
+
+      #display left combined vertical layout
+      layout_left_combined = QVBoxLayout()
+      layout_left_combined.addLayout(layout_left_chooseImage)
+      layout_left_combined.addLayout(layout_left_displayInfo)
+      layout_overall.addLayout(layout_left_combined)
+
+      #display right combined vertical layout
+      layout_right_vertical = QVBoxLayout()
+      layout_right_vertical.addLayout(layout_right_grid)
+      layout_right_vertical.addLayout(layout_right_displayImage)
+      layout_overall.addLayout(layout_right_vertical)
       #layout4.addLayout(layout2)
 
-      self.setLayout(layout4)
+      self.setLayout(layout_overall)
 
 
    def getfile(self):
@@ -115,84 +144,11 @@ class detector1(QWidget):
        self.findNum = self.regex.findall(str(self.fname))
        self.txt = self.extractNum.setText("The following numbers are Quality Factor, Image Name, Quality Factor, " +
                                           "Cropped X vale and Cropped Y value: " + str(self.findNum))
-       print self.findNum[3], self.findNum[4]
+       #print self.findNum[3], self.findNum[4]
 
        return self.txt, self.findNum[3], self.findNum[4]
 
 # Right block functions
-
-   def detector1(self):
-       im = Image.open(str(self.fname)).convert('L')
-       pix = im.load()
-       M, N = im.size
-       arr = np.zeros((M / 8 - 1, N / 8 - 1))
-       arr2 = np.zeros((M / 8 - 1, N / 8 - 1))
-
-       for i in range(0, M / 8 - 1):
-           for j in range(0, N / 8 - 1):
-               A = pix[i * 8 + 3, j * 8 + 3]
-               B = pix[i * 8 + 4, j * 8 + 3]
-               C = pix[i * 8 + 3, j * 8 + 4]
-               D = pix[i * 8 + 4, j * 8 + 4]
-
-               E = pix[i * 8 + 7, j * 8 + 7]
-               F = pix[i * 8 + 8, j * 8 + 7]
-               G = pix[i * 8 + 7, j * 8 + 8]
-               H = pix[i * 8 + 8, j * 8 + 8]
-
-               Z = abs(A - B - C + D)
-               Z2 = abs(E - F - G + H)
-               arr[i][j] = Z
-               arr2[i][j] = Z2
-
-
-       h1, binEdges = np.histogram(arr, bins=np.arange(0, 256), normed=True)
-       bincenters = 0.5 * (binEdges[1:] + binEdges[:-1])
-
-       h2, binEdges = np.histogram(arr2, bins=np.arange(0, 256), normed=True)
-       bincenters = 0.5 * (binEdges[1:] + binEdges[:-1])
-
-       h3 = abs(h1 - h2)
-       k = sum(h3)
-       self.contents3.setText(str(k))
-       #self.contents3.setStyleSheet("QTextEdit {color:red}")
-       #self.contents3.setStyleSheet("QTextEdit { background-color: rgb(0, 255, 0); }");
-       norm = k / 1.6
-       if 0 <= norm < 0.1:
-           self.contents3.setStyleSheet("QTextEdit { background-color: rgb(255,165,0); }")
-       elif 0.1 <= norm < 0.2:
-           self.contents3.setStyleSheet("QTextEdit { background-color: rgb(255,140,0); }")
-       elif 0.2 <= norm < 0.3:
-           self.contents3.setStyleSheet("QTextEdit { background-color: rgb(255,69,0); }")
-       elif 0.3 <= norm < 0.4:
-           self.contents3.setStyleSheet("QTextEdit { background-color: rgb(255,160,122); }")
-       elif 0.4 <= norm < 0.5:
-           self.contents3.setStyleSheet("QTextEdit { background-color: rgb(250,128,114); }")
-       elif 0.5 <= norm < 0.6:
-           self.contents3.setStyleSheet("QTextEdit { background-color: rgb(233,150,122); }")
-       elif 0.6 <= norm < 0.7:
-           self.contents3.setStyleSheet("QTextEdit { background-color: rgb(240,128,128); }")
-       elif 0.7 <= norm < 0.8:
-           self.contents3.setStyleSheet("QTextEdit { background-color: rgb(205,92,92); }")
-       elif 0.8 <= norm < 0.9:
-           self.contents3.setStyleSheet("QTextEdit { background-color: rgb(255,127,80); }")
-       elif 0.9 <= norm < 1.0:
-           self.contents3.setStyleSheet("QTextEdit { background-color: rgb(255,99,71); }")
-       elif 1.0 <= norm < 1.1:
-           self.contents3.setStyleSheet("QTextEdit { background-color: rgb(255,0,0); }")
-       elif 1.1 <= norm < 1.2:
-           self.contents3.setStyleSheet("QTextEdit { background-color: rgb(220,20,60); }")
-       elif 1.2 <= norm < 1.3:
-           self.contents3.setStyleSheet("QTextEdit { background-color: rgb(178,34,34); }")
-       elif 1.3 <= norm < 1.4:
-           self.contents3.setStyleSheet("QTextEdit { background-color: rgb(165,42,42); }")
-       elif 1.4 <= norm < 1.5:
-           self.contents3.setStyleSheet("QTextEdit { background-color: rgb(139,0,0); }")
-       else:
-           self.contents3.setStyleSheet("QTextEdit { background-color: rgb(128,0,0); }")
-
-       return k
-
 
    def detector2_1(self):
        im = Image.open(str(self.fname)).convert('L')
@@ -259,8 +215,98 @@ class detector1(QWidget):
         self.contents2.setStyleSheet("QTextEdit { background-color: rgb(0, 255, 0); }")
        else:
         self.contents2.setStyleSheet("QTextEdit { background-color: rgb(255, 0, 0); }")
-       return c, d
+       return c,
 
+   def detector_grid(self):
+       nrows, ncols = 8, 8
+       image = np.zeros((nrows, ncols))
+       image[7, 7] = np.random.random(1)
+
+       image = image.reshape((nrows, ncols))
+
+       row_labels = range(nrows)
+       col_labels = range(ncols)
+       ax = self.figure.add_subplot(111)
+       ax.hold(False)
+       ax.set_yticklabels(col_labels)
+       ax.set_xticklabels(row_labels)
+       ax.plot(image)
+       ax.set_title('ahahaha')
+       self.canvas.draw()
+
+
+
+
+   def detector1(self):
+       im = Image.open(str(self.fname)).convert('L')
+       pix = im.load()
+       M, N = im.size
+       arr = np.zeros((M / 8 - 1, N / 8 - 1))
+       arr2 = np.zeros((M / 8 - 1, N / 8 - 1))
+
+       for i in range(0, M / 8 - 1):
+           for j in range(0, N / 8 - 1):
+               A = pix[i * 8 + 3, j * 8 + 3]
+               B = pix[i * 8 + 4, j * 8 + 3]
+               C = pix[i * 8 + 3, j * 8 + 4]
+               D = pix[i * 8 + 4, j * 8 + 4]
+
+               E = pix[i * 8 + 7, j * 8 + 7]
+               F = pix[i * 8 + 8, j * 8 + 7]
+               G = pix[i * 8 + 7, j * 8 + 8]
+               H = pix[i * 8 + 8, j * 8 + 8]
+
+               Z = abs(A - B - C + D)
+               Z2 = abs(E - F - G + H)
+               arr[i][j] = Z
+               arr2[i][j] = Z2
+
+       h1, binEdges = np.histogram(arr, bins=np.arange(0, 256), normed=True)
+       bincenters = 0.5 * (binEdges[1:] + binEdges[:-1])
+
+       h2, binEdges = np.histogram(arr2, bins=np.arange(0, 256), normed=True)
+       bincenters = 0.5 * (binEdges[1:] + binEdges[:-1])
+
+       h3 = abs(h1 - h2)
+       k = sum(h3)
+       self.contents3.setText(str(k))
+       # self.contents3.setStyleSheet("QTextEdit {color:red}")
+       # self.contents3.setStyleSheet("QTextEdit { background-color: rgb(0, 255, 0); }");
+       norm = k / 1.6
+       if 0 <= norm < 0.1:
+           self.contents3.setStyleSheet("QTextEdit { background-color: rgb(255,165,0); }")
+       elif 0.1 <= norm < 0.2:
+           self.contents3.setStyleSheet("QTextEdit { background-color: rgb(255,140,0); }")
+       elif 0.2 <= norm < 0.3:
+           self.contents3.setStyleSheet("QTextEdit { background-color: rgb(255,69,0); }")
+       elif 0.3 <= norm < 0.4:
+           self.contents3.setStyleSheet("QTextEdit { background-color: rgb(255,160,122); }")
+       elif 0.4 <= norm < 0.5:
+           self.contents3.setStyleSheet("QTextEdit { background-color: rgb(250,128,114); }")
+       elif 0.5 <= norm < 0.6:
+           self.contents3.setStyleSheet("QTextEdit { background-color: rgb(233,150,122); }")
+       elif 0.6 <= norm < 0.7:
+           self.contents3.setStyleSheet("QTextEdit { background-color: rgb(240,128,128); }")
+       elif 0.7 <= norm < 0.8:
+           self.contents3.setStyleSheet("QTextEdit { background-color: rgb(205,92,92); }")
+       elif 0.8 <= norm < 0.9:
+           self.contents3.setStyleSheet("QTextEdit { background-color: rgb(255,127,80); }")
+       elif 0.9 <= norm < 1.0:
+           self.contents3.setStyleSheet("QTextEdit { background-color: rgb(255,99,71); }")
+       elif 1.0 <= norm < 1.1:
+           self.contents3.setStyleSheet("QTextEdit { background-color: rgb(255,0,0); }")
+       elif 1.1 <= norm < 1.2:
+           self.contents3.setStyleSheet("QTextEdit { background-color: rgb(220,20,60); }")
+       elif 1.2 <= norm < 1.3:
+           self.contents3.setStyleSheet("QTextEdit { background-color: rgb(178,34,34); }")
+       elif 1.3 <= norm < 1.4:
+           self.contents3.setStyleSheet("QTextEdit { background-color: rgb(165,42,42); }")
+       elif 1.4 <= norm < 1.5:
+           self.contents3.setStyleSheet("QTextEdit { background-color: rgb(139,0,0); }")
+       else:
+           self.contents3.setStyleSheet("QTextEdit { background-color: rgb(128,0,0); }")
+
+       return k
 
 
 
@@ -295,7 +341,8 @@ class detector1(QWidget):
        q_max = c
        m = d - 4
        n = c - 4
-       if (p_max and q_max) >= 4:
+       print [p_max, q_max], [m, n]
+       if p_max >= 4 and q_max >= 4:
            block = 0
        else:
            block = 1
@@ -323,8 +370,10 @@ class detector1(QWidget):
        bincenters = 0.5 * (binEdges[1:] + binEdges[:-1])
 
        h3 = abs(h1 - h2)
+       #print h3
        k = sum(h3)
-       self.contents4.setText(str([k]))
+
+       self.contents4.setText(str(k))
        norm = k / 1.6
        if 0 <= norm < 0.1:
            self.contents4.setStyleSheet("QTextEdit { background-color: rgb(255,165,0); }")
