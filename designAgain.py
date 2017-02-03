@@ -49,7 +49,7 @@ class detector1(QWidget):
       self.btn1 = QPushButton("Process") # All process
       self.btn1.clicked.connect(self.detector2_1)
       self.btn1.clicked.connect(self.detector2_2)
-      self.btn1.clicked.connect(self.detector_grid)
+      self.btn1.clicked.connect(self.fill_square)
       self.btn1.clicked.connect(self.detector1)
       self.btn1.clicked.connect(self.detector21)#call def detector
       self.btn1.clicked.connect(self.detector3_combined)
@@ -71,9 +71,12 @@ class detector1(QWidget):
       layout_right_grid.addWidget(self.contents2, 1, 1)
 
         #canvas
-      self.figure = plt.figure()
-      self.canvas = FigureCanvas(self.figure)
-      layout_right_grid.addWidget(self.canvas, 1, 2)
+      #self.figure = plt.figure()
+      #self.canvas = FigureCanvas(self.figure)
+      #layout_right_grid.addWidget(self.canvas, 1, 2)
+
+      self.ground = QLabel("Ground True")
+      layout_right_grid.addWidget(self.ground, 1, 2)
 
       self.la2 = QLabel("JPEG STH")
       layout_right_grid.addWidget(self.la2, 3, 0)
@@ -217,22 +220,78 @@ class detector1(QWidget):
         self.contents2.setStyleSheet("QTextEdit { background-color: rgb(255, 0, 0); }")
        return c,
 
-   def detector_grid(self):
-       nrows, ncols = 8, 8
-       image = np.zeros((nrows, ncols))
-       image[7, 7] = np.random.random(1)
+   def fill_square(self):
 
-       image = image.reshape((nrows, ncols))
+       # Parameters
+       jpg_offset_row = 3
+       jpg_offset_col = 6
 
-       row_labels = range(nrows)
-       col_labels = range(ncols)
-       ax = self.figure.add_subplot(111)
-       ax.hold(False)
-       ax.set_yticklabels(col_labels)
-       ax.set_xticklabels(row_labels)
-       ax.plot(image)
-       ax.set_title('ahahaha')
-       self.canvas.draw()
+       step = 10
+       out_size = 400
+
+       line_color = (0, 255, 255)
+       center_color = (0, 0, 255)
+
+       # Initialize white background
+       grid = np.ones((step * 8 + 9, step * 8 + 9, 3), np.uint8) * 255
+
+       # Create the grid
+       for idx in range(9):
+           ctr = (step + 1) * idx
+           grid[:, ctr] = 0
+           grid[ctr, :] = 0
+
+       for col in range(8):
+           left_x = (step + 1) * col + 1
+           right_x = (step + 1) * (col + 1) - 1
+           top_y = (step + 1) * jpg_offset_row + 1
+           bottom_y = (step + 1) * (jpg_offset_row + 1) - 1
+
+           corners = np.asarray(
+               [(left_x, top_y),
+                (right_x, top_y),
+                (right_x, bottom_y),
+                (left_x, bottom_y)]
+           )
+
+           cv2.fillConvexPoly(grid, corners, line_color)
+
+       for row in range(8):
+           left_x = (step + 1) * jpg_offset_col + 1
+           right_x = (step + 1) * (jpg_offset_col + 1) - 1
+           top_y = (step + 1) * row + 1
+           bottom_y = (step + 1) * (row + 1) - 1
+
+           corners = np.asarray(
+               [(left_x, top_y),
+                (right_x, top_y),
+                (right_x, bottom_y),
+                (left_x, bottom_y)]
+           )
+
+           cv2.fillConvexPoly(grid, corners, line_color)
+
+       left_x2 = (step + 1) * jpg_offset_col + 1
+       right_x2 = (step + 1) * (jpg_offset_col + 1) - 1
+       top_y2 = (step + 1) * jpg_offset_row + 1
+       bottom_y2 = (step + 1) * (jpg_offset_row + 1) - 1
+       corners2 = np.asarray(
+           [(left_x2, top_y2),
+            (right_x2, top_y2),
+            (right_x2, bottom_y2),
+            (left_x2, bottom_y2)]
+       )
+
+       cv2.fillConvexPoly(grid, corners2, center_color)
+       grid = cv2.resize(grid, (out_size, out_size), interpolation=cv2.INTER_NEAREST)
+       #g = np.asarray(dtype=np.dtype('unit8'), a=grid)
+
+       new_image = Image.fromarray(grid.astype(np.uint8))
+       qimage = ImageQt(new_image)
+
+       self.ground.setPixmap(QPixmap.fromImage(qimage))
+       self.ground.show()
+
 
 
 
@@ -307,8 +366,6 @@ class detector1(QWidget):
            self.contents3.setStyleSheet("QTextEdit { background-color: rgb(128,0,0); }")
 
        return k
-
-
 
    def detector21(self):
        im = Image.open(str(self.fname)).convert('L')
@@ -483,7 +540,7 @@ class detector1(QWidget):
            new_image = Image.fromarray(g)
            qimage = ImageQt(new_image)
 
-           self.cb.setPixmap(QPixmap.fromImage(qimage))
+
            self.cb.show()
            return g
 
