@@ -10,7 +10,7 @@ from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as Navigatio
 from PIL.ImageQt import ImageQt
 import re
 import cv2
-import random
+
 
 img = cv2.imread('zsnorlax.png')
 
@@ -187,7 +187,7 @@ class detector1(QWidget):
         self.contents.setStyleSheet("QTextEdit { background-color: rgb(255, 0, 0); }")
 
 
-       print q_max, p_max, self.findNum[3], self.findNum[4]
+       #print q_max, p_max, self.findNum[3], self.findNum[4]
        return [q_max, p_max]
 
    def detector2_2(self):
@@ -218,13 +218,13 @@ class detector1(QWidget):
         self.contents2.setStyleSheet("QTextEdit { background-color: rgb(0, 255, 0); }")
        else:
         self.contents2.setStyleSheet("QTextEdit { background-color: rgb(255, 0, 0); }")
-       return c,
+       return c, d
 
    def fill_square(self):
 
        # Parameters
-       jpg_offset_row = 3
-       jpg_offset_col = 6
+       jpg_offset_row = int(self.findNum[3])
+       jpg_offset_col = int(self.findNum[4])
 
        step = 10
        out_size = 400
@@ -284,16 +284,20 @@ class detector1(QWidget):
 
        cv2.fillConvexPoly(grid, corners2, center_color)
        grid = cv2.resize(grid, (out_size, out_size), interpolation=cv2.INTER_NEAREST)
-       #g = np.asarray(dtype=np.dtype('unit8'), a=grid)
+       #cv2.imwrite('grid.png',grid)
 
-       new_image = Image.fromarray(grid.astype(np.uint8))
+       g = np.asarray(dtype=np.dtype('uint8'), a=grid)
+       #g = np.zeros((200, 200, 3), dtype='uint8')
+       new_image = Image.fromarray(g)
        qimage = ImageQt(new_image)
 
-       self.ground.setPixmap(QPixmap.fromImage(qimage))
+       #print g.shape
+       self.ground.setPixmap(QPixmap('grid.png'))
+       #self.ground.setPixmap(QBitmap.fromImage(qimage, flags=Qt.ColorOnly))
        self.ground.show()
 
-
-
+       #self.fname = QFileDialog.getOpenFileName(self, 'Open file', 'c:\\', "Image files (*.jpg *.png)")
+       #self.ground.setPixmap(QPixmap(self.fname))
 
 
    def detector1(self):
@@ -531,63 +535,23 @@ class detector1(QWidget):
 
                    sum_v[col][row] = sum2
            myarray2 = np.asarray(sum_v)
-           # print sum_h
-           # plt.imshow(sum_h)
-           # plt.show()
            combined = (myarray + myarray2)/2.0
+           combined = combined[0:-1, 0:-1].T
            g = np.asarray(dtype=np.dtype('float'), a=combined)
-           g = imresize(g, pix.shape, interp='nearest')
+           g = imresize(g, (int(pix.shape[0]/1.1), int(pix.shape[1]/1.1)), interp='nearest')
+
+           pix2 = np.array(im).astype(np.float)
+           m, n = pix2.shape
+           print m,n
+           if m < n:
+                g = np.rot90(g)
            new_image = Image.fromarray(g)
            qimage = ImageQt(new_image)
 
-
+           self.cb.setPixmap(QPixmap.fromImage(qimage))
            self.cb.show()
            return g
 
-'''
-   def detector3_v(self):
-       im = Image.open(str(self.fname)).convert('L')
-       pix = np.array(im).astype(np.float)
-       r, c = pix.shape
-
-       if r < c:
-           # rotate the image
-           pix = np.rot90(pix)
-           r, c = pix.shape
-
-       arr_v = np.zeros((32, 31))
-       sum_v = np.zeros((c / 32, r / 32))
-
-       if r % 32 == 0 and c & 32 == 0:
-           r_index = r / 32
-           c_index = c / 32
-       else:
-           r_index = r / 32 - 1
-           c_index = c / 32 - 1
-
-           # vertical
-       for col in xrange(0, c_index):
-           for row in xrange(0, r_index):
-               for i in xrange(32):
-                   for j in xrange(31):
-                       v1 = pix[row * 32 + i, col * 32 + j + 1]
-                       v2 = pix[row * 32 + i, col * 32 + j]
-                       v = v1 - v2
-                       arr_v[i][j] = v
-
-               arr_v = np.abs(arr_v)
-               fft2 = np.abs(np.fft.fft2(arr_v, [32, 32]))  # FFT of vertical gradient
-               if sum(fft2[0, 1:16]) == 0:
-                   sum2 = 0
-               else:
-                   sum2 = (fft2[0, 4] + fft2[0, 8] + fft2[0, 12]) / sum(fft2[0, 1:16])
-
-               sum_v[col][row] = sum2
-       myarray2 = np.asarray(sum_v)
-       self.contents6.setText(str(myarray2))
-       return myarray2
-
-'''
 def main():
    app = QApplication(sys.argv)
    ex = detector1()
