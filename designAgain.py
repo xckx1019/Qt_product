@@ -62,11 +62,11 @@ class detector1(QWidget):
       self.la1 = QLabel("JPEG Grid Detector")
       layout_right_grid.addWidget(self.la1, 0, 0)
 
-      self.contents = QTextEdit()
+      self.contents = QLabel("Detector21")
       self.contents.setMinimumSize(200, 200)
       layout_right_grid.addWidget(self.contents, 1, 0)
 
-      self.contents2 = QTextEdit()
+      self.contents2 = QLabel("Detector22")
       self.contents2.setMinimumSize(200, 200)
       layout_right_grid.addWidget(self.contents2, 1, 1)
 
@@ -146,7 +146,7 @@ class detector1(QWidget):
        self.regex = re.compile(r'\d+')
        self.findNum = self.regex.findall(str(self.fname))
        self.txt = self.extractNum.setText("The following numbers are Quality Factor, Image Name, Quality Factor, " +
-                                          "Cropped X vale and Cropped Y value: " + str(self.findNum))
+                                          "Cropped Height vale and Cropped Width value: " + str(self.findNum))
        #print self.findNum[3], self.findNum[4]
 
        return self.txt, self.findNum[3], self.findNum[4]
@@ -182,9 +182,9 @@ class detector1(QWidget):
        self.contents.setText(str([q_max, p_max]))
 
        if [7 - q_max, 7 - p_max] == [int(self.findNum[3]), int(self.findNum[4])]:
-        self.contents.setStyleSheet("QTextEdit { background-color: rgb(0, 255, 0); }")
+        self.contents.setPixmap(QPixmap("g" + str(7 - q_max) + str(7 - p_max) + ".png"))
        else:
-        self.contents.setStyleSheet("QTextEdit { background-color: rgb(255, 0, 0); }")
+        self.contents.setPixmap(QPixmap(str(7 - q_max) + str(7 - p_max) + ".png"))
 
 
        #print q_max, p_max, self.findNum[3], self.findNum[4]
@@ -215,9 +215,9 @@ class detector1(QWidget):
        self.contents2.setText(str([c, d]))
 
        if [7 - c, 7 - d] == [int(self.findNum[3]), int(self.findNum[4])]:
-        self.contents2.setStyleSheet("QTextEdit { background-color: rgb(0, 255, 0); }")
+        self.contents2.setPixmap(QPixmap("g" + str(7 - c) + str(7 - d) + ".png"))
        else:
-        self.contents2.setStyleSheet("QTextEdit { background-color: rgb(255, 0, 0); }")
+        self.contents2.setPixmap(QPixmap(str(7 - c) + str(7 - d) + ".png"))
        return c, d
 
    def fill_square(self):
@@ -226,73 +226,7 @@ class detector1(QWidget):
        jpg_offset_row = int(self.findNum[3])
        jpg_offset_col = int(self.findNum[4])
 
-       step = 10
-       out_size = 400
-
-       line_color = (0, 255, 255)
-       center_color = (0, 0, 255)
-
-       # Initialize white background
-       grid = np.ones((step * 8 + 9, step * 8 + 9, 3), np.uint8) * 255
-
-       # Create the grid
-       for idx in range(9):
-           ctr = (step + 1) * idx
-           grid[:, ctr] = 0
-           grid[ctr, :] = 0
-
-       for col in range(8):
-           left_x = (step + 1) * col + 1
-           right_x = (step + 1) * (col + 1) - 1
-           top_y = (step + 1) * jpg_offset_row + 1
-           bottom_y = (step + 1) * (jpg_offset_row + 1) - 1
-
-           corners = np.asarray(
-               [(left_x, top_y),
-                (right_x, top_y),
-                (right_x, bottom_y),
-                (left_x, bottom_y)]
-           )
-
-           cv2.fillConvexPoly(grid, corners, line_color)
-
-       for row in range(8):
-           left_x = (step + 1) * jpg_offset_col + 1
-           right_x = (step + 1) * (jpg_offset_col + 1) - 1
-           top_y = (step + 1) * row + 1
-           bottom_y = (step + 1) * (row + 1) - 1
-
-           corners = np.asarray(
-               [(left_x, top_y),
-                (right_x, top_y),
-                (right_x, bottom_y),
-                (left_x, bottom_y)]
-           )
-
-           cv2.fillConvexPoly(grid, corners, line_color)
-
-       left_x2 = (step + 1) * jpg_offset_col + 1
-       right_x2 = (step + 1) * (jpg_offset_col + 1) - 1
-       top_y2 = (step + 1) * jpg_offset_row + 1
-       bottom_y2 = (step + 1) * (jpg_offset_row + 1) - 1
-       corners2 = np.asarray(
-           [(left_x2, top_y2),
-            (right_x2, top_y2),
-            (right_x2, bottom_y2),
-            (left_x2, bottom_y2)]
-       )
-
-       cv2.fillConvexPoly(grid, corners2, center_color)
-       grid = cv2.resize(grid, (out_size, out_size), interpolation=cv2.INTER_NEAREST)
-       #cv2.imwrite('grid.png',grid)
-
-       g = np.asarray(dtype=np.dtype('uint8'), a=grid)
-       #g = np.zeros((200, 200, 3), dtype='uint8')
-       new_image = Image.fromarray(g)
-       qimage = ImageQt(new_image)
-
-       #print g.shape
-       self.ground.setPixmap(QPixmap('grid.png'))
+       self.ground.setPixmap(QPixmap("g"+str(self.findNum[3])+str(self.findNum[4])+".png"))
        #self.ground.setPixmap(QBitmap.fromImage(qimage, flags=Qt.ColorOnly))
        self.ground.show()
 
